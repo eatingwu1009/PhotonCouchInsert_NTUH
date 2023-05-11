@@ -1,0 +1,7 @@
+C:\Users\aria\source\plugins\Photon_CouchInsert.esapi.dll
+C:\Users\aria\source\plugins\Photon_CouchInsert.esapi.pdb
+C:\Users\aria\source\repos\CouchInsert - Photon\obj\x64\Debug\Photon_CouchInsert.csproj.AssemblyReference.cache
+C:\Users\aria\source\repos\CouchInsert - Photon\obj\x64\Debug\Photon_CouchInsert.csproj.CoreCompileInputs.cache
+C:\Users\aria\source\repos\CouchInsert - Photon\obj\x64\Debug\Photon_CouchInsert.csproj.CopyComplete
+C:\Users\aria\source\repos\CouchInsert - Photon\obj\x64\Debug\Photon_CouchInsert.esapi.dll
+C:\Users\aria\source\repos\CouchInsert - Photon\obj\x64\Debug\Photon_CouchInsert.esapi.pdb
