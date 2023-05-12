@@ -14,6 +14,7 @@ using System.ComponentModel;
 using System.Windows.Media.Media3D;
 using System.Xml.Linq;
 using System.Windows.Forms.VisualStyles;
+using System.Windows.Media;
 
 // TODO: Replace the following version attributes by creating AssemblyInfo.cs. You can do this in the properties of the Visual Studio project.
 [assembly: AssemblyVersion("1.0.0.1")]
@@ -72,8 +73,8 @@ namespace VMS.TPS
             //VVector Ymax = Temp.Where(s => s.y.Equals(Temp.Max(p => p.y))).FirstOrDefault();
 
             //Find center X
-            VVector Start = new VVector(700, 0, Convert.ToInt32(SI.ZSize / 2));
-            VVector Stop = new VVector(-700, 0, Convert.ToInt32(SI.ZSize / 2));
+            VVector Start = new VVector(700, 0, 0);
+            VVector Stop = new VVector(-700, 0, 0);
             double[] PreallocatedBuffer = new double[1000];
             ImageProfile XProfile = SI.GetImageProfile(Start, Stop, PreallocatedBuffer);
             double X2 = XProfile.Where(p => !Double.IsNaN(p.Value)).Max(p => p.Position.x);
@@ -82,8 +83,8 @@ namespace VMS.TPS
             double Xborder = Math.Abs(X2 - X1);
 
             //Find center Y
-            Start = new VVector(Xcenter, 700* chkOrientation, Convert.ToInt32(SI.ZSize / 2));
-            Stop = new VVector(Xcenter, -700* chkOrientation, Convert.ToInt32(SI.ZSize / 2));
+            Start = new VVector(Xcenter, 700* chkOrientation, 0);
+            Stop = new VVector(Xcenter, -700* chkOrientation, 0);
             double[] YPreallocatedBuffer = new double[1000];
             ImageProfile YProfile = SI.GetImageProfile(Start, Stop, YPreallocatedBuffer);
             double Y2 = YProfile.Where(p => !Double.IsNaN(p.Value)).Max(p => p.Position.y);
@@ -96,8 +97,8 @@ namespace VMS.TPS
             List<double> YLocation = new List<double>();
             for (int i = 1; i < Convert.ToInt32(SI.YSize * SI.YRes / 2); i++)
             {
-                VVector __Start = new VVector((-SI.XSize * SI.XRes / 2) + Xcenter, chkOrientation *((SI.YSize * SI.YRes / 2) - (i)) + Ycenter, Convert.ToInt32(SI.ZSize / 2));
-                VVector __Stop = new VVector((SI.XSize * SI.XRes / 2) + Xcenter, chkOrientation * ((SI.YSize * SI.YRes / 2) - (i)) + Ycenter, Convert.ToInt32(SI.ZSize / 2));
+                VVector __Start = new VVector((-SI.XSize * SI.XRes / 2) + Xcenter, chkOrientation *((SI.YSize * SI.YRes / 2) - (i)) + Ycenter, 0);
+                VVector __Stop = new VVector((SI.XSize * SI.XRes / 2) + Xcenter, chkOrientation * ((SI.YSize * SI.YRes / 2) - (i)) + Ycenter, 0);
                 double[] __PreallocatedBuffer = new double[100];
                 ImageProfile __Profile = SI.GetImageProfile(__Start, __Stop, __PreallocatedBuffer);
                 double sum = 0;
@@ -122,28 +123,28 @@ namespace VMS.TPS
                 index = YHU_Diff.IndexOf(YHU_Diff.Min());
                 FinalYcenter = YLocation.ElementAt(index);
 
-                VVector _Start = new VVector(-275 + Xcenter, FinalYcenter + chkOrientation*3, Convert.ToInt32(SI.ZSize / 2));
-                VVector _Stop = new VVector(0 + Xcenter, FinalYcenter + chkOrientation*3, Convert.ToInt32(SI.ZSize / 2));
+                VVector _Start = new VVector(-275 + Xcenter, FinalYcenter + chkOrientation*3, 0);
+                VVector _Stop = new VVector(0 + Xcenter, FinalYcenter + chkOrientation*3, 0);
                 double[] _PreallocatedBuffer = new double[1000];
                 ImageProfile XProfile1 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer);
                 Couch1 = FindHighestSlope(XProfile1);
-                _Start = new VVector(0 + Xcenter, FinalYcenter + chkOrientation*3, Convert.ToInt32(SI.ZSize / 2));
-                _Stop = new VVector(275 + Xcenter, FinalYcenter + chkOrientation*3, Convert.ToInt32(SI.ZSize / 2));
+                _Start = new VVector(0 + Xcenter, FinalYcenter + chkOrientation*3, 0);
+                _Stop = new VVector(275 + Xcenter, FinalYcenter + chkOrientation*3, 0);
                 ImageProfile XProfile2 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer);
                 Couch2 = FindHighestSlope(XProfile2);
 
-                _Start = new VVector(-275 + Xcenter, FinalYcenter, Convert.ToInt32(SI.ZSize / 2));
-                _Stop = new VVector(0 + Xcenter, FinalYcenter, Convert.ToInt32(SI.ZSize / 2));
+                _Start = new VVector(-275 + Xcenter, FinalYcenter, 0);
+                _Stop = new VVector(0 + Xcenter, FinalYcenter, 0);
                 ImageProfile XProfile3 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer);
                 Couch3 = FindHighestSlope(XProfile3);
-                _Start = new VVector(0 + Xcenter, FinalYcenter, Convert.ToInt32(SI.ZSize / 2));
-                _Stop = new VVector(275 + Xcenter, FinalYcenter, Convert.ToInt32(SI.ZSize / 2));
+                _Start = new VVector(0 + Xcenter, FinalYcenter, 0);
+                _Stop = new VVector(275 + Xcenter, FinalYcenter, 0);
                 ImageProfile XProfile4 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer);
                 Couch4 = FindHighestSlope(XProfile4);
 
                 double CouchBorder1 = Math.Round(VVector.Distance(Couch1, Couch2) / 10);
                 double CouchBorder2 = Math.Round(VVector.Distance(Couch3, Couch4) / 10);
-                if (CouchBorder1 == 47 | CouchBorder2 == 51 | CouchBorder2 == 53) break;
+                if ((CouchBorder1 == 52 && CouchBorder2 == 51)| (CouchBorder1 == 51 && CouchBorder2 == 49)  ) break;
                 i++;
             }
 
@@ -195,6 +196,7 @@ namespace VMS.TPS
                 CouchInterior.AddContourOnImagePlane(CSVVector.Select(v => new VVector(v.x + ShiftX, v.y + ShiftY, v.z)).ToArray(), i);
             }
             CouchSurface.SegmentVolume = CouchSurface.SegmentVolume.Sub(CouchInterior.SegmentVolume);
+            //CouchInterior.SegmentVolume = CouchInterior.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 0,0,0,0, 0.03, 0));
             CouchInterior.SetAssignedHU(-950);
             CouchSurface.SetAssignedHU(-550);
 
