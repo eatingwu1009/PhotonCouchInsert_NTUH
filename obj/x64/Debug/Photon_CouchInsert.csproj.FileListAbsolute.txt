@@ -5,3 +5,13 @@ C:\Users\aria\source\repos\CouchInsert - Photon\obj\x64\Debug\Photon_CouchInsert
 C:\Users\aria\source\repos\CouchInsert - Photon\obj\x64\Debug\Photon_CouchInsert.csproj.CopyComplete
 C:\Users\aria\source\repos\CouchInsert - Photon\obj\x64\Debug\Photon_CouchInsert.esapi.dll
 C:\Users\aria\source\repos\CouchInsert - Photon\obj\x64\Debug\Photon_CouchInsert.esapi.pdb
+C:\Users\aria\source\repos\CouchInsert - Photon - ProneOK\obj\x64\Debug\Photon_CouchInsert.csproj.AssemblyReference.cache
+C:\Users\aria\source\repos\CouchInsert - Photon - ProneOK\obj\x64\Debug\Photon_CouchInsert.csproj.CoreCompileInputs.cache
+C:\Users\aria\source\repos\CouchInsert - Photon - ProneOK\obj\x64\Debug\Photon_CouchInsert.csproj.CopyComplete
+C:\Users\aria\source\repos\CouchInsert - Photon - ProneOK\obj\x64\Debug\Photon_CouchInsert.esapi.dll
+C:\Users\aria\source\repos\CouchInsert - Photon - ProneOK\obj\x64\Debug\Photon_CouchInsert.esapi.pdb
+C:\Users\aria\source\repos\CouchInsert - Photon - ForAnalysis\obj\x64\Debug\Photon_CouchInsert.csproj.AssemblyReference.cache
+C:\Users\aria\source\repos\CouchInsert - Photon - ForAnalysis\obj\x64\Debug\Photon_CouchInsert.csproj.CoreCompileInputs.cache
+C:\Users\aria\source\repos\CouchInsert - Photon - ForAnalysis\obj\x64\Debug\Photon_CouchInsert.csproj.CopyComplete
+C:\Users\aria\source\repos\CouchInsert - Photon - ForAnalysis\obj\x64\Debug\Photon_CouchInsert.esapi.dll
+C:\Users\aria\source\repos\CouchInsert - Photon - ForAnalysis\obj\x64\Debug\Photon_CouchInsert.esapi.pdb
