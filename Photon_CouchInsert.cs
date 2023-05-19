@@ -98,10 +98,10 @@ namespace VMS.TPS
             double Yborder = Math.Abs(X2 - X1);
 
             //chkBrain
-            bool chkBrain = new bool(); 
+            bool chkBrain, chkBrain2 = new bool(); chkBrain2 = false;
             double BrainBorder1 = YProfile.Where(p => !Double.IsNaN(p.Value) && p.Value != -1000).Min(p => p.Position.y);
             double BrainBorder2 = YProfile.Where(p => !Double.IsNaN(p.Value) && p.Value != -1000).Max(p => p.Position.y);
-            if (Math.Abs(BrainBorder1 - BrainBorder2) <= 400) chkBrain = true; else chkBrain = false;
+            if (Math.Abs(BrainBorder1 - BrainBorder2) <= 450) chkBrain = true; else chkBrain = false;
 
 
 
@@ -110,7 +110,7 @@ namespace VMS.TPS
             List<double> YLocation = new List<double>();
             VVector __Start = new VVector();
             VVector __Stop = new VVector();
-            int a = 1; if(chkBrain) a = Convert.ToInt32(BrainBorder1);
+            int a = 1; if (chkBrain) a = Convert.ToInt32(BrainBorder1);
             for (int i = a; i < Convert.ToInt32(SI.YSize * SI.YRes / 2); i++)
             {
 
@@ -125,32 +125,22 @@ namespace VMS.TPS
                 }
                 if (sum != 0)
                 {
-                YHU_Diff.Add(sum);
-                YLocation.Add(chkOrientation * ((SI.YSize * SI.YRes / 2) - (i)) + Ycenter);
+                    YHU_Diff.Add(sum);
+                    YLocation.Add(chkOrientation * ((SI.YSize * SI.YRes / 2) - (i)) + Ycenter);
                 }
             }
             int index = new int();
-            double FinalYcenter = new double();
-            index = YHU_Diff.IndexOf(YHU_Diff.Min());
-            FinalYcenter = YLocation.ElementAt(index);
+            double FinalYcenter, chkHeight, BadChkpoint,  Brn1, Brn2, Brn3, Brn4 = new double(); BadChkpoint = 0;
+            List<double> BadChk = new List<double>();
+            double[] _PreallocatedBuffer = new double[1000];
+            double[] _PreallocatedBuffer1 = new double[100];
 
             //Find the point with the highest slope from centerx, and check the distance near 47cm or 51cm
-            VVector Couch1, Couch2, Couch3, Couch4 = new VVector();
+            VVector Couch1, Couch2, Couch3, Couch4, _Start, _Stop = new VVector();
+            index = YHU_Diff.IndexOf(YHU_Diff.Min());
+            FinalYcenter = YLocation.ElementAt(index);
             for (int i = 0; i < 50; i++)
             {
-                YHU_Diff.RemoveAt(index);
-                YLocation.RemoveAt(index);
-
-                VVector _Start = new VVector(-275 + Xcenter, FinalYcenter + chkOrientation * 3, originZ);
-                VVector _Stop = new VVector(0 + Xcenter, FinalYcenter + chkOrientation * 3, originZ);
-                double[] _PreallocatedBuffer = new double[1000];
-                ImageProfile XProfile1 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer);
-                Couch1 = FindHighestSlope(XProfile1);
-                _Start = new VVector(0 + Xcenter, FinalYcenter + chkOrientation * 3, originZ);
-                _Stop = new VVector(275 + Xcenter, FinalYcenter + chkOrientation * 3, originZ);
-                ImageProfile XProfile2 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer);
-                Couch2 = FindHighestSlope(XProfile2);
-
                 _Start = new VVector(-275 + Xcenter, FinalYcenter, originZ);
                 _Stop = new VVector(0 + Xcenter, FinalYcenter, originZ);
                 ImageProfile XProfile3 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer);
@@ -160,50 +150,77 @@ namespace VMS.TPS
                 ImageProfile XProfile4 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer);
                 Couch4 = FindHighestSlope(XProfile4);
 
-                VVector _Start1 = new VVector(-50 + Xcenter, FinalYcenter + chkOrientation * 5, originZ);
-                VVector _Stop1 = new VVector(50 + Xcenter, FinalYcenter + chkOrientation * 5, originZ);
-                double[] _PreallocatedBuffer1 = new double[100];
-                ImageProfile XProfileBrn1 = SI.GetImageProfile(_Start1, _Stop1, _PreallocatedBuffer1);
-                double Brn1 = XProfileBrn1.FirstOrDefault().Value ;
-
-                VVector _Start2 = new VVector(-50 + Xcenter, FinalYcenter + chkOrientation * 5, originZ);
-                VVector _Stop2 = new VVector(50 + Xcenter, FinalYcenter + chkOrientation * 5, originZ);
-                ImageProfile XProfileBrn2 = SI.GetImageProfile(_Start2, _Stop2, _PreallocatedBuffer1);
-                double Brn2 = XProfileBrn2.FirstOrDefault().Value;
-
-                VVector _Start3 = new VVector(-50 + Xcenter, FinalYcenter + chkOrientation * 4, originZ);
-                VVector _Stop3 = new VVector(50 + Xcenter, FinalYcenter + chkOrientation * 4, originZ);
-                ImageProfile XProfileBrn3 = SI.GetImageProfile(_Start3, _Stop3, _PreallocatedBuffer1);
-                double Brn3 = XProfileBrn1.FirstOrDefault().Value;
-
-                _Start = new VVector(-50 + Xcenter, FinalYcenter - chkOrientation * 4, originZ);
-                _Stop = new VVector(50 + Xcenter, FinalYcenter - chkOrientation * 4, originZ);
-                ImageProfile XProfileBrn4 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer);
-                double Brn4 = XProfileBrn1.FirstOrDefault().Value;
-                bool chkBrain2 = new bool();
-                if (chkBrain == true)
+                if ((FinalYcenter + chkOrientation * 5) <= Y2 && (FinalYcenter - chkOrientation * 5) >= Y1)
                 {
-                    if ((Brn1 !=-1000 && Brn1< -600) && (Brn2 != -1000 && Brn2 < -600) && (Brn3 != -1000 && Brn3 < -600) && (Brn4 != -1000 && Brn4 < -600))
-                    { chkBrain2 = true; }
-                    else chkBrain2 = false;
-                }
+                    YHU_Diff.RemoveAt(index);
+                    YLocation.RemoveAt(index);
 
-                double CouchBorder1 = Math.Round(VVector.Distance(Couch1, Couch2) / 10);
-                double CouchBorder2 = Math.Round(VVector.Distance(Couch3, Couch4) / 10);
-                if (((CouchBorder2 >=50 && CouchBorder2 <= 53) && (CouchBorder1 >= 47 && CouchBorder1 <= 52) && (CouchBorder2 >= CouchBorder1)) | (chkBrain == true & chkBrain2 == true)) break;
-                
+                    _Start = new VVector(-275 + Xcenter, FinalYcenter + chkOrientation * 3, originZ);
+                    _Stop = new VVector(0 + Xcenter, FinalYcenter + chkOrientation * 3, originZ);
+                    ImageProfile XProfile1 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer);
+                    Couch1 = FindHighestSlope(XProfile1);
+                    _Start = new VVector(0 + Xcenter, FinalYcenter + chkOrientation * 3, originZ);
+                    _Stop = new VVector(275 + Xcenter, FinalYcenter + chkOrientation * 3, originZ);
+                    ImageProfile XProfile2 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer);
+                    Couch2 = FindHighestSlope(XProfile2);
+
+                    _Start = new VVector(-50 + Xcenter, FinalYcenter + chkOrientation, originZ);
+                    _Stop = new VVector(50 + Xcenter, FinalYcenter + chkOrientation, originZ);
+                    ImageProfile XProfilechk = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer1);
+                    chkHeight = XProfilechk[50].Value;
+
+                    _Start = new VVector(-50 + Xcenter, FinalYcenter + chkOrientation * 5, originZ);
+                    _Stop = new VVector(50 + Xcenter, FinalYcenter + chkOrientation * 5, originZ);
+                    ImageProfile XProfileBrn1 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer1);
+                    Brn1 = XProfileBrn1.Where(p => !Double.IsNaN(p.Value)).Min(p => p.Value);
+
+                    _Start = new VVector(-250 + Xcenter, FinalYcenter - chkOrientation * 5, originZ);
+                    _Stop = new VVector(250 + Xcenter, FinalYcenter - chkOrientation * 5, originZ);
+                    ImageProfile XProfileBrn2 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer1);
+                    Brn2 = XProfileBrn2.Where(p => !Double.IsNaN(p.Value)).Min(p => p.Value);
+
+                    _Start = new VVector(-50 + Xcenter, FinalYcenter + chkOrientation * 4, originZ);
+                    _Stop = new VVector(50 + Xcenter, FinalYcenter + chkOrientation * 4, originZ);
+                    ImageProfile XProfileBrn3 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer1);
+                    Brn3 = XProfileBrn3.Where(p => !Double.IsNaN(p.Value)).Min(p => p.Value);
+  
+                    _Start = new VVector(-250 + Xcenter, FinalYcenter - chkOrientation * 4, originZ);
+                    _Stop = new VVector(250 + Xcenter, FinalYcenter - chkOrientation * 4, originZ);
+                    ImageProfile XProfileBrn4 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer1);
+                    Brn4 = XProfileBrn4.Where(p => !Double.IsNaN(p.Value)).Min(p => p.Value);
+
+                    if ((Brn1 != -1000 && Brn1 < -600) && (Brn2 != -1000 && Brn2 < -600) && (Brn3 != -1000 && Brn3 < -600) && (Brn4 != -1000 && Brn4 < -600))
+                    { chkBrain2 = true; }
+
+                    double CouchBorder1 = Math.Round(VVector.Distance(Couch1, Couch2) / 10);
+                    double CouchBorder2 = Math.Round(VVector.Distance(Couch3, Couch4) / 10);
+                    if (CouchBorder1 < CouchBorder2)
+                    {
+                        CouchBorder1 = Math.Round(VVector.Distance(Couch3, Couch4) / 10);
+                        CouchBorder2 = Math.Round(VVector.Distance(Couch1, Couch2) / 10);
+                    }
+                    if (chkBrain2 == true) BadChk.Add(FinalYcenter); BadChkpoint = i;
+                    if (((CouchBorder1 >= 50 && CouchBorder1 <= 53) && (CouchBorder2 >= 47 && CouchBorder2 <= 53) && (chkHeight > -650)) | (chkBrain == true && chkBrain2 == true)) break;
+                }
+                else 
+                {
+                    YHU_Diff.RemoveAt(index);
+                    YLocation.RemoveAt(index);
+                }
                 index = YHU_Diff.IndexOf(YHU_Diff.Min());
                 FinalYcenter = YLocation.ElementAt(index);
                 i++;
             }
             //Add Couch
+            if (BadChkpoint > 30) FinalYcenter = BadChk.FirstOrDefault();
+
             bool imageResized = true;
             string errorCouch = "error";
             Structure CouchSurface = SS.Structures.FirstOrDefault(e => e.Id == "CouchSurface");
             Structure CouchInterior = SS.Structures.FirstOrDefault(e => e.Id == "CouchInterior");
             if (CouchSurface != null) SS.RemoveStructure(CouchSurface);
             if (CouchInterior != null) SS.RemoveStructure(CouchInterior);
-            
+
             SS.AddCouchStructures("Exact_IGRT_Couch_Top_medium", orientation, RailPosition.In, RailPosition.In, -500, -950, null, out IReadOnlyList<Structure> couchStructureList, out imageResized, out errorCouch);
             CouchSurface = SS.Structures.FirstOrDefault(e => e.Id == "CouchSurface");
             CouchInterior = SS.Structures.FirstOrDefault(e => e.Id == "CouchInterior");
@@ -276,7 +293,7 @@ namespace VMS.TPS
                 SS.RemoveStructure(record);
                 writer.WriteLine();
 
-                writer.WriteLine(final-FinalYcenter + "," + SI.ZSize * SI.ZRes + "," + SI.ZRes);
+                writer.WriteLine(final - FinalYcenter + "," + SI.ZSize * SI.ZRes + "," + SI.ZRes + "," + SI.ZSize);
                 DateTime dateTime2 = DateTime.Now;
                 TimeSpan dateTime3 = dateTime2.Subtract(dateTime1);
                 writer.WriteLine(dateTime3.ToString() + "," + SI.Series.ImagingDeviceId.ToString());
