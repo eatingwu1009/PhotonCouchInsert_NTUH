@@ -139,6 +139,9 @@ namespace VMS.TPS
             VVector Couch1, Couch2, Couch3, Couch4, _Start, _Stop = new VVector();
             index = YHU_Diff.IndexOf(YHU_Diff.Min());
             FinalYcenter = YLocation.ElementAt(index);
+            double limit1 = FinalYcenter + chkOrientation * 5;
+            double limit2 = FinalYcenter - chkOrientation * 5;
+
             for (int i = 0; i < 50; i++)
             {
                 _Start = new VVector(-275 + Xcenter, FinalYcenter, originZ);
@@ -149,8 +152,10 @@ namespace VMS.TPS
                 _Stop = new VVector(275 + Xcenter, FinalYcenter, originZ);
                 ImageProfile XProfile4 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer);
                 Couch4 = FindHighestSlope(XProfile4);
+                limit1 = FinalYcenter + chkOrientation * 5; limit2 = FinalYcenter - chkOrientation * 5;
+                if (limit1 > limit2) { limit2 = limit1; limit1 = FinalYcenter - chkOrientation * 5; }
 
-                if ((FinalYcenter + chkOrientation * 5) <= Y2 && (FinalYcenter - chkOrientation * 5) >= Y1)
+                if ((limit2 < Y2) && (limit1 > Y1))
                 {
                     YHU_Diff.RemoveAt(index);
                     YLocation.RemoveAt(index);
@@ -276,7 +281,7 @@ namespace VMS.TPS
             CouchSurface.StructureCode = CScode;
             CouchInterior.StructureCode = CIcode;
 
-            using (StreamWriter writer = new StreamWriter(@"C: \Users\aria\Downloads\Interpolation\Volume.csv"))
+            using (StreamWriter writer = new StreamWriter(@"C: \Priscilla\API\Volume.csv "))
             //\Priscilla\API\Volume.csv  //C: \Users\aria\Downloads\Interpolation\Volume.csv
             {
                 Structure OriCS = SS.Structures.FirstOrDefault(e => e.Id == "Ori_CouchSurface");
