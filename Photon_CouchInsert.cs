@@ -210,7 +210,14 @@ namespace VMS.TPS
             bool imageResized = true;
             string errorCouch = "error";
             List<VVector> CSVVector = new List<VVector>();
-            if (SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL") is null | SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL").Volume == 0)
+
+            if (SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL") == null)
+            {
+                var BodyPar = SS.GetDefaultSearchBodyParameters();
+                BodyPar.KeepLargestParts = false;
+                SS.CreateAndSearchBody(BodyPar);
+            }
+            else if (SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL").Volume == 0)
             {
                 var BodyPar = SS.GetDefaultSearchBodyParameters();
                 BodyPar.KeepLargestParts = false;
