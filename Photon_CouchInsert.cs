@@ -16,6 +16,7 @@ using System.Xml.Linq;
 using System.Windows.Forms.VisualStyles;
 using System.Windows.Media;
 using System.Diagnostics.Eventing.Reader;
+using System.Windows.Forms;
 
 // TODO: Replace the following version attributes by creating AssemblyInfo.cs. You can do this in the properties of the Visual Studio project.
 [assembly: AssemblyVersion("1.0.0.1")]
@@ -42,7 +43,7 @@ namespace VMS.TPS
             PatientOrientation orientation = scriptContext.Image.ImagingOrientation;
             if (orientation == PatientOrientation.HeadFirstSupine | orientation == PatientOrientation.FeetFirstSupine | orientation == PatientOrientation.Sitting) chkOrientation = 1;
             else if (orientation == PatientOrientation.HeadFirstProne | orientation == PatientOrientation.FeetFirstProne) chkOrientation = -1;
-            else MessageBox.Show("This CT image Orientation is not supported : No Orientation or Decubitus");
+            else System.Windows.MessageBox.Show("This CT image Orientation is not supported : No Orientation or Decubitus");
 
             scriptContext.Patient.BeginModifications();
             StructureSet SS = scriptContext.StructureSet;
@@ -209,20 +210,31 @@ namespace VMS.TPS
             FinalYcenter = FinalYcenter - 0.4* chkOrientation;
             bool imageResized = true;
             string errorCouch = "error";
+            Structure BODY = SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL");
+            double BodyVolume = new double();
+            if (BODY == null)
+            {
+                var BodyPar = SS.GetDefaultSearchBodyParameters();
+                BodyPar.KeepLargestParts = true;
+                SS.CreateAndSearchBody(BodyPar);
+                BodyVolume = SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL").Volume;
+                SS.RemoveStructure(SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL"));
+                BodyPar = SS.GetDefaultSearchBodyParameters();
+                BodyPar.KeepLargestParts = false;
+                SS.CreateAndSearchBody(BodyPar);
+            }
+            else if (BODY.Volume == 0)
+            {
+                var BodyPar = SS.GetDefaultSearchBodyParameters();
+                BodyPar.KeepLargestParts = true;
+                SS.CreateAndSearchBody(BodyPar);
+                BodyVolume = SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL").Volume;
+                SS.RemoveStructure(SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL"));
+                BodyPar = SS.GetDefaultSearchBodyParameters();
+                BodyPar.KeepLargestParts = false;
+                SS.CreateAndSearchBody(BodyPar);
+            }
             List<VVector> CSVVector = new List<VVector>();
-
-            if (SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL") == null)
-            {
-                var BodyPar = SS.GetDefaultSearchBodyParameters();
-                BodyPar.KeepLargestParts = false;
-                SS.CreateAndSearchBody(BodyPar);
-            }
-            else if (SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL").Volume == 0)
-            {
-                var BodyPar = SS.GetDefaultSearchBodyParameters();
-                BodyPar.KeepLargestParts = false;
-                SS.CreateAndSearchBody(BodyPar);
-            }
             if (SS.CanAddCouchStructures(out errorCouch) == true)
             {
                 SS.AddCouchStructures("Exact_IGRT_Couch_Top_medium", orientation, RailPosition.In, RailPosition.In, -500, -950, null, out IReadOnlyList<Structure> couchStructureList, out imageResized, out errorCouch);
@@ -280,20 +292,22 @@ namespace VMS.TPS
                 CouchInterior.StructureCode = CIcode;
 
                 //BODY part
+                BODY = SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL");
                 Structure Temp = SS.AddStructure("CONTROL", "Temp_ForCouch");
                 VVector[] TempVec = GetpseudoLine(FinalYcenter, SI.XSize, SI.YSize, chkOrientation);
                 for (int i = 0; i < Convert.ToInt32(SI.ZSize); i++)
                 {
                     Temp.AddContourOnImagePlane(TempVec, i);
                 }
-                Structure BODY = SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL");
                 BODY.SegmentVolume = BODY.SegmentVolume.Sub(Temp.SegmentVolume);
                 SS.RemoveStructure(Temp);
+                if (BODY.Volume > BodyVolume) { System.Windows.Forms.MessageBox.Show("Please Check your BODY carefully", "Confirmation", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+                BODY.Comment = "Modified by ESAPI";
             }
             else if (errorCouch.Contains("Support structures already exist in the structure set."))
             {
+                CSVVector.Clear();
                 Structure CouchSurface = SS.Structures.FirstOrDefault(e => e.Id == "CouchSurface");
-                Structure CouchInterior = SS.Structures.FirstOrDefault(e => e.Id == "CouchInterior");
                 foreach (VVector[] vectors in CouchSurface.GetContoursOnImagePlane(1))
                 {
                     foreach (VVector v in vectors)
@@ -307,17 +321,19 @@ namespace VMS.TPS
                 if(chkOrientation == 1)
                 { FinalYcenter = CSVVector.Min(p => p.y); }
                 else { FinalYcenter = CSVVector.Max(p => p.y); }
+                BODY = SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL");
                 Structure Temp = SS.AddStructure("CONTROL", "Temp_ForCouch");
                 VVector[] TempVec = GetpseudoLine(FinalYcenter, SI.XSize, SI.YSize, chkOrientation);
                 for (int i = 0; i < Convert.ToInt32(SI.ZSize); i++)
                 {
                     Temp.AddContourOnImagePlane(TempVec, i);
                 }
-                Structure BODY = SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL");
                 BODY.SegmentVolume = BODY.SegmentVolume.Sub(Temp.SegmentVolume);
                 SS.RemoveStructure(Temp);
+                if (BODY.Volume > BodyVolume) { System.Windows.Forms.MessageBox.Show("Please Check your BODY carefully", "Confirmation", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
+                BODY.Comment = "Modified by ESAPI";
             }
-            else { MessageBox.Show(errorCouch); }
+            else { System.Windows.MessageBox.Show(errorCouch); }
         }
         public double[] MaxMinDetect(List<VVector> VVectors, PatientOrientation Ori)
         {
