@@ -227,8 +227,7 @@ namespace VMS.TPS
                 BodyPar = SS.GetDefaultSearchBodyParameters();
                 //NTUH default setting
                 BodyPar.KeepLargestParts = false;
-                BodyPar.PreDisconnect = true;
-                BodyPar.PreDisconnectRadius = 0.2;
+                BodyPar.PreDisconnect = false;
                 BodyPar.FillAllCavities = true;
                 BodyPar.PreCloseOpenings = true;
                 BodyPar.PreCloseOpeningsRadius = 0.2;
@@ -246,14 +245,12 @@ namespace VMS.TPS
                 BodyPar = SS.GetDefaultSearchBodyParameters();
                 //NTUH default setting
                 BodyPar.KeepLargestParts = false;
-                BodyPar.PreDisconnect = true;
-                BodyPar.PreDisconnectRadius = 0.2;
+                BodyPar.PreDisconnect = false;
                 BodyPar.FillAllCavities = true;
                 BodyPar.PreCloseOpenings = true;
                 BodyPar.PreCloseOpeningsRadius = 0.2;
                 BodyPar.Smoothing = true;
                 BodyPar.SmoothingLevel = 3;
-                BodyPar.KeepLargestParts = false;
                 SS.CreateAndSearchBody(BodyPar);
             }
             List<VVector> CSVVector = new List<VVector>();
