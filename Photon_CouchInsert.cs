@@ -19,8 +19,8 @@ using System.Diagnostics.Eventing.Reader;
 using System.Windows.Forms;
 
 // TODO: Replace the following version attributes by creating AssemblyInfo.cs. You can do this in the properties of the Visual Studio project.
-[assembly: AssemblyVersion("1.0.0.1")]
-[assembly: AssemblyFileVersion("1.0.0.1")]
+[assembly: AssemblyVersion("1.0.0.2")]
+[assembly: AssemblyFileVersion("1.0.0.2")]
 [assembly: AssemblyInformationalVersion("1.0")]
 
 // TODO: Uncomment the following line if the script requires write access.
@@ -131,8 +131,8 @@ namespace VMS.TPS
             VVector Couch1, Couch2, Couch3, Couch4, _Start, _Stop = new VVector();
             index = YHU_Diff.IndexOf(YHU_Diff.Min());
             FinalYcenter = YLocation.ElementAt(index);
-            double limit1 = FinalYcenter + chkOrientation * 5;
-            double limit2 = FinalYcenter - chkOrientation * 5;
+            double limit1 = FinalYcenter + 5;
+            double limit2 = FinalYcenter - 5;
 
             for (int i = 0; i < 50; i++)
             {
@@ -255,7 +255,7 @@ namespace VMS.TPS
             }
             List<VVector> CSVVector = new List<VVector>();
             bool AddCouch = true;
-            if (SI.XSize <= 540) 
+            if ((SI.XSize * SI.XRes) <= 540) 
             {  
                DialogResult result = System.Windows.Forms.MessageBox.Show("Enlarging is irreversible. Are you sure you want to enlarge the image?", "External Beam Planning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (result == DialogResult.No) { AddCouch = false; }
