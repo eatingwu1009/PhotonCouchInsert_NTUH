@@ -1,26 +1,15 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Input;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using VMS.TPS.Common.Model.API;
 using VMS.TPS.Common.Model.Types;
-using CouchInsert;
-using System.IO;
-using System.ComponentModel;
-using System.Windows.Media.Media3D;
-using System.Xml.Linq;
-using System.Windows.Forms.VisualStyles;
-using System.Windows.Media;
-using System.Diagnostics.Eventing.Reader;
 using System.Windows.Forms;
 
 // TODO: Replace the following version attributes by creating AssemblyInfo.cs. You can do this in the properties of the Visual Studio project.
-[assembly: AssemblyVersion("1.0.0.2")]
-[assembly: AssemblyFileVersion("1.0.0.2")]
+[assembly: AssemblyVersion("1.0.0.5")]
+[assembly: AssemblyFileVersion("1.0.0.5")]
 [assembly: AssemblyInformationalVersion("1.0")]
 
 // TODO: Uncomment the following line if the script requires write access.
@@ -41,6 +30,7 @@ namespace VMS.TPS
             Image SI = scriptContext.Image;
             double chkOrientation = new double();
             PatientOrientation orientation = scriptContext.Image.ImagingOrientation;
+            DateTime dateTime1 = DateTime.Now;
             if (orientation == PatientOrientation.HeadFirstSupine | orientation == PatientOrientation.FeetFirstSupine | orientation == PatientOrientation.Sitting) chkOrientation = 1;
             else if (orientation == PatientOrientation.HeadFirstProne | orientation == PatientOrientation.FeetFirstProne) chkOrientation = -1;
             else System.Windows.MessageBox.Show("This CT image Orientation is not supported : No Orientation or Decubitus");
@@ -190,6 +180,7 @@ namespace VMS.TPS
 
                     if (Brn1 < -600 &&  Brn2 < -600 && (Brn3 <= -850 && Brn3 >=-950) && Brn4 < -600)
                     { chkBrain2 = true; }
+                    else { chkBrain2 = false; }
 
                     double CouchBorder1 = Math.Round(VVector.Distance(Couch1, Couch2) / 10);
                     double CouchBorder2 = Math.Round(VVector.Distance(Couch3, Couch4) / 10);
@@ -198,7 +189,7 @@ namespace VMS.TPS
                         CouchBorder1 = Math.Round(VVector.Distance(Couch3, Couch4) / 10);
                         CouchBorder2 = Math.Round(VVector.Distance(Couch1, Couch2) / 10);
                     }
-                    if (((CouchBorder1 >= 50 && CouchBorder1 <= 54) && (CouchBorder2 >= 47 && CouchBorder2 <= 54) && (chkHeight > -650 | chkBrain2 == true) && BodyfixChk<0) | (chkBrain == true && chkBrain2 == true)) break;
+                    if (((CouchBorder1 >= 49 && CouchBorder1 <= 54) && (CouchBorder2 >= 47 && CouchBorder2 <= 54) && (chkHeight > -650 && chkBrain2 == true) && BodyfixChk<0) | (chkBrain == true && chkBrain2 == true)) break;
                     YHU_Diff.RemoveAt(index);
                     YLocation.RemoveAt(index);
                 }
@@ -226,6 +217,7 @@ namespace VMS.TPS
                 SS.RemoveStructure(SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL"));
                 BodyPar = SS.GetDefaultSearchBodyParameters();
                 //NTUH default setting
+                BodyPar.LowerHUThreshold = -350;
                 BodyPar.KeepLargestParts = false;
                 BodyPar.PreDisconnect = false;
                 BodyPar.FillAllCavities = true;
@@ -244,6 +236,7 @@ namespace VMS.TPS
                 SS.RemoveStructure(SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL"));
                 BodyPar = SS.GetDefaultSearchBodyParameters();
                 //NTUH default setting
+                BodyPar.LowerHUThreshold = -350;
                 BodyPar.KeepLargestParts = false;
                 BodyPar.PreDisconnect = false;
                 BodyPar.FillAllCavities = true;
@@ -446,6 +439,8 @@ namespace VMS.TPS
                     else { System.Windows.MessageBox.Show(errorCouch); }
                     break;
             }
+            DateTime dateTime2 = DateTime.Now;
+            System.Windows.MessageBox.Show( (dateTime2 - dateTime1).ToString());
         }
         public double[] MaxMinDetect(List<VVector> VVectors, PatientOrientation Ori)
         {
