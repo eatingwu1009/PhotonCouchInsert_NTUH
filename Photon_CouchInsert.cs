@@ -8,8 +8,8 @@ using VMS.TPS.Common.Model.Types;
 using System.Windows.Forms;
 
 // TODO: Replace the following version attributes by creating AssemblyInfo.cs. You can do this in the properties of the Visual Studio project.
-[assembly: AssemblyVersion("1.0.0.5")]
-[assembly: AssemblyFileVersion("1.0.0.5")]
+[assembly: AssemblyVersion("1.0.0.7")]
+[assembly: AssemblyFileVersion("1.0.0.7")]
 [assembly: AssemblyInformationalVersion("1.0")]
 
 // TODO: Uncomment the following line if the script requires write access.
@@ -30,7 +30,7 @@ namespace VMS.TPS
             Image SI = scriptContext.Image;
             double chkOrientation = new double();
             PatientOrientation orientation = scriptContext.Image.ImagingOrientation;
-            DateTime dateTime1 = DateTime.Now;
+
             if (orientation == PatientOrientation.HeadFirstSupine | orientation == PatientOrientation.FeetFirstSupine | orientation == PatientOrientation.Sitting) chkOrientation = 1;
             else if (orientation == PatientOrientation.HeadFirstProne | orientation == PatientOrientation.FeetFirstProne) chkOrientation = -1;
             else System.Windows.MessageBox.Show("This CT image Orientation is not supported : No Orientation or Decubitus");
@@ -112,7 +112,7 @@ namespace VMS.TPS
                 }
             }
             int index = new int();
-            double FinalYcenter, chkHeight, Brn1, Brn2, Brn3, Brn4, BodyfixChk = new double(); 
+            double FinalYcenter, chkHeight, Brn1, Brn2, Brn3, Brn4, BodyfixChk = new double();
             List<double> BadChk = new List<double>();
             double[] _PreallocatedBuffer = new double[1000];
             double[] _PreallocatedBuffer1 = new double[100];
@@ -148,8 +148,8 @@ namespace VMS.TPS
                     ImageProfile XProfile2 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer);
                     Couch2 = FindHighestSlope(XProfile2);
 
-                    _Start = new VVector(-50 + Xcenter, FinalYcenter + chkOrientation , originZ);
-                    _Stop = new VVector(50 + Xcenter, FinalYcenter + chkOrientation , originZ);
+                    _Start = new VVector(-50 + Xcenter, FinalYcenter + chkOrientation, originZ);
+                    _Stop = new VVector(50 + Xcenter, FinalYcenter + chkOrientation, originZ);
                     ImageProfile XProfilechk = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer1);
                     chkHeight = XProfilechk[50].Value;
 
@@ -167,7 +167,7 @@ namespace VMS.TPS
                     _Stop = new VVector(50 + Xcenter, FinalYcenter + chkOrientation * 4, originZ);
                     ImageProfile XProfileBrn3 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer1);
                     Brn3 = XProfileBrn3.Where(p => !Double.IsNaN(p.Value)).Min(p => p.Value);
-  
+
                     _Start = new VVector(-250 + Xcenter, FinalYcenter - chkOrientation * 4, originZ);
                     _Stop = new VVector(250 + Xcenter, FinalYcenter - chkOrientation * 4, originZ);
                     ImageProfile XProfileBrn4 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer1);
@@ -178,7 +178,7 @@ namespace VMS.TPS
                     ImageProfile XProfileBrn5 = SI.GetImageProfile(_Start, _Stop, _PreallocatedBuffer1);
                     BodyfixChk = XProfileBrn5[99].Value;
 
-                    if (Brn1 < -600 &&  Brn2 < -600 && (Brn3 <= -850 && Brn3 >=-950) && Brn4 < -600)
+                    if (Brn1 < -600 && Brn2 < -600 && (Brn3 <= -850 && Brn3 >= -950) && Brn4 < -600)
                     { chkBrain2 = true; }
                     else { chkBrain2 = false; }
 
@@ -189,11 +189,11 @@ namespace VMS.TPS
                         CouchBorder1 = Math.Round(VVector.Distance(Couch3, Couch4) / 10);
                         CouchBorder2 = Math.Round(VVector.Distance(Couch1, Couch2) / 10);
                     }
-                    if (((CouchBorder1 >= 49 && CouchBorder1 <= 54) && (CouchBorder2 >= 47 && CouchBorder2 <= 54) && (chkHeight > -650 && chkBrain2 == true) && BodyfixChk<0) | (chkBrain == true && chkBrain2 == true)) break;
+                    if (((CouchBorder1 >= 49 && CouchBorder1 <= 54) && (CouchBorder2 >= 47 && CouchBorder2 <= 54) && (chkHeight > -650 && chkBrain2 == true) && BodyfixChk < 0) | (chkBrain == true && chkBrain2 == true)) break;
                     YHU_Diff.RemoveAt(index);
                     YLocation.RemoveAt(index);
                 }
-                else 
+                else
                 {
                     YHU_Diff.RemoveAt(index);
                     YLocation.RemoveAt(index);
@@ -203,7 +203,7 @@ namespace VMS.TPS
                 i++;
             }
             //Add Couch
-            FinalYcenter = FinalYcenter - 0.4* chkOrientation;
+            FinalYcenter = FinalYcenter - 0.4 * chkOrientation;
             bool imageResized = true;
             string errorCouch = "error";
             Structure BODY = SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL");
@@ -248,9 +248,9 @@ namespace VMS.TPS
             }
             List<VVector> CSVVector = new List<VVector>();
             bool AddCouch = true;
-            if ((SI.XSize * SI.XRes) <= 540) 
-            {  
-               DialogResult result = System.Windows.Forms.MessageBox.Show("Enlarging is irreversible. Are you sure you want to enlarge the image?", "External Beam Planning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if ((SI.XSize * SI.XRes) <= 540)
+            {
+                DialogResult result = System.Windows.Forms.MessageBox.Show("Enlarging is irreversible. Are you sure you want to enlarge the image?", "External Beam Planning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (result == DialogResult.No) { AddCouch = false; }
             }
             switch (AddCouch)
@@ -258,75 +258,100 @@ namespace VMS.TPS
                 case (false):
                     break;
                 default:
+                    string msg = "There is no couch. Would you like to add one via AutoDetect?\n\nNote : if number of image is above 300 or CT slice thickness is less than 2mm, the processing time will be over 1 minute.";
+                    DialogResult resultA = System.Windows.Forms.MessageBox.Show(msg, "AutoDetect", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     if (SS.CanAddCouchStructures(out errorCouch) == true)
                     {
-                        SS.AddCouchStructures("Exact_IGRT_Couch_Top_medium", orientation, RailPosition.In, RailPosition.In, -500, -950, null, out IReadOnlyList<Structure> couchStructureList, out imageResized, out errorCouch);
-                        Structure CouchSurface = SS.Structures.FirstOrDefault(e => e.Id == "CouchSurface");
-                        Structure CouchInterior = SS.Structures.FirstOrDefault(e => e.Id == "CouchInterior");
-                        StructureCode CScode = CouchSurface.StructureCode;
-                        StructureCode CIcode = CouchInterior.StructureCode;
-                        CouchSurface.SegmentVolume = CouchSurface.SegmentVolume.Or(CouchInterior.SegmentVolume);
-                        foreach (VVector[] vectors in CouchSurface.GetContoursOnImagePlane(1))
+                        if (resultA == DialogResult.No)
                         {
-                            foreach (VVector v in vectors)
+                            SS.AddCouchStructures("Exact_IGRT_Couch_Top_medium", orientation, RailPosition.In, RailPosition.In, -500, -950, null, out IReadOnlyList<Structure> couchStructureList, out imageResized, out errorCouch);
+                        }
+                        else if (resultA == DialogResult.Yes)
+                        {
+                            SS.AddCouchStructures("Exact_IGRT_Couch_Top_medium", orientation, RailPosition.In, RailPosition.In, -500, -950, null, out IReadOnlyList<Structure> couchStructureList, out imageResized, out errorCouch);
+                            Structure CouchSurface = SS.Structures.FirstOrDefault(e => e.Id == "CouchSurface");
+                            Structure CouchInterior = SS.Structures.FirstOrDefault(e => e.Id == "CouchInterior");
+                            StructureCode CScode = CouchSurface.StructureCode;
+                            StructureCode CIcode = CouchInterior.StructureCode;
+                            CouchSurface.SegmentVolume = CouchSurface.SegmentVolume.Or(CouchInterior.SegmentVolume);
+                            foreach (VVector[] vectors in CouchSurface.GetContoursOnImagePlane(1))
                             {
-                                double x = v.x;
-                                double y = v.y;
-                                double z = v.z;
-                                CSVVector.Add(new VVector(x, y, z));
+                                foreach (VVector v in vectors)
+                                {
+                                    double x = v.x;
+                                    double y = v.y;
+                                    double z = v.z;
+                                    CSVVector.Add(new VVector(x, y, z));
+                                }
                             }
-                        }
-                        double MMX = MaxMinDetect(CSVVector, orientation)[0]; double MMY = MaxMinDetect(CSVVector, orientation)[1];
-                        double ShiftX = -265 - MMX;
-                        double ShiftY = (FinalYcenter) - MMY;
+                            double MMX = MaxMinDetect(CSVVector, orientation)[0]; double MMY = MaxMinDetect(CSVVector, orientation)[1];
+                            double ShiftX = -265 - MMX;
+                            double ShiftY = (FinalYcenter) - MMY;
 
-                        SS.RemoveStructure(CouchSurface);
-                        CouchSurface = SS.AddStructure("SUPPORT", "CouchSurface");
-                        for (int i = 0; i < Convert.ToInt32(SI.ZSize); i++)
-                        {
-                            CouchSurface.AddContourOnImagePlane(CSVVector.Select(v => new VVector(v.x + ShiftX, v.y + ShiftY, v.z)).ToArray(), i);
-                        }
-
-
-                        CSVVector.Clear();
-                        foreach (VVector[] vectors in CouchInterior.GetContoursOnImagePlane(1))
-                        {
-                            foreach (VVector v in vectors)
+                            SS.RemoveStructure(CouchSurface);
+                            CouchSurface = SS.AddStructure("SUPPORT", "CouchSurface");
+                            for (int i = 0; i < Convert.ToInt32(SI.ZSize); i++)
                             {
-                                double x = v.x;
-                                double y = v.y;
-                                double z = v.z;
-                                CSVVector.Add(new VVector(x, y, z));
+                                CouchSurface.AddContourOnImagePlane(CSVVector.Select(v => new VVector(v.x + ShiftX, v.y + ShiftY, v.z)).ToArray(), i);
                             }
-                        }
-                        SS.RemoveStructure(CouchInterior);
-                        CouchInterior = SS.AddStructure("SUPPORT", "CouchInterior");
-                        for (int i = 0; i < Convert.ToInt32(SI.ZSize); i++)
-                        {
-                            CouchInterior.AddContourOnImagePlane(CSVVector.Select(v => new VVector(v.x + ShiftX, v.y + ShiftY, v.z)).ToArray(), i);
-                        }
-                        CouchSurface.SegmentVolume = CouchSurface.SegmentVolume.Sub(CouchInterior.SegmentVolume);
-                        //CouchInterior.SegmentVolume = CouchInterior.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 0,0,0,0, 0.03, 0));
-                        CouchInterior.SetAssignedHU(-950);
-                        CouchSurface.SetAssignedHU(-550);
-                        CouchInterior.Comment = "NTUH_Exact IGRT Couch, medium";
-                        CouchSurface.Comment = "NTUH_Exact IGRT Couch, medium";
-                        CouchSurface.StructureCode = CScode;
-                        CouchInterior.StructureCode = CIcode;
+                            CSVVector.Clear();
+                            foreach (VVector[] vectors in CouchInterior.GetContoursOnImagePlane(1))
+                            {
+                                foreach (VVector v in vectors)
+                                {
+                                    double x = v.x;
+                                    double y = v.y;
+                                    double z = v.z;
+                                    CSVVector.Add(new VVector(x, y, z));
+                                }
+                            }
+                            SS.RemoveStructure(CouchInterior);
+                            CouchInterior = SS.AddStructure("SUPPORT", "CouchInterior");
+                            for (int i = 0; i < Convert.ToInt32(SI.ZSize); i++)
+                            {
+                                CouchInterior.AddContourOnImagePlane(CSVVector.Select(v => new VVector(v.x + ShiftX, v.y + ShiftY, v.z)).ToArray(), i);
+                            }
+                            CouchSurface.SegmentVolume = CouchSurface.SegmentVolume.Sub(CouchInterior.SegmentVolume);
+                            //CouchInterior.SegmentVolume = CouchInterior.AsymmetricMargin(new AxisAlignedMargins(StructureMarginGeometry.Outer, 0,0,0,0, 0.03, 0));
+                            CouchInterior.SetAssignedHU(-950);
+                            CouchSurface.SetAssignedHU(-550);
+                            CouchInterior.Comment = "NTUH_Exact IGRT Couch, medium";
+                            CouchSurface.Comment = "NTUH_Exact IGRT Couch, medium";
+                            CouchSurface.StructureCode = CScode;
+                            CouchInterior.StructureCode = CIcode;
 
-                        //BODY part
-                        BODY = SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL");
-                        Structure Temp = SS.AddStructure("CONTROL", "Temp_ForCouch");
-                        VVector[] TempVec = GetpseudoLine(FinalYcenter, SI.XSize, SI.YSize, chkOrientation);
-                        for (int i = 0; i < Convert.ToInt32(SI.ZSize); i++)
-                        {
-                            Temp.AddContourOnImagePlane(TempVec, i);
+                            //BODY part
+                            Structure CouchSurface2 = SS.Structures.FirstOrDefault(e => e.Id == "CouchSurface");
+                            foreach (VVector[] vectors in CouchSurface2.GetContoursOnImagePlane(1))
+                            {
+                                foreach (VVector v in vectors)
+                                {
+                                    double x = v.x;
+                                    double y = v.y;
+                                    double z = v.z;
+                                    CSVVector.Add(new VVector(x, y, z));
+                                }
+                            }
+                            if (chkOrientation == 1)
+                            { FinalYcenter = CSVVector.Min(p => p.y); }
+                            else { FinalYcenter = CSVVector.Max(p => p.y); }
+                            BODY = SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL");
+                            Structure Temp = SS.AddStructure("CONTROL", "Temp_ForCouch");
+                            VVector[] TempVec = GetpseudoLine(FinalYcenter, SI.XSize, SI.YSize, chkOrientation);
+                            for (int i = 0; i < Convert.ToInt32(SI.ZSize); i++)
+                            {
+                                Temp.AddContourOnImagePlane(TempVec, i);
+                            }
+                            BODY.SegmentVolume = BODY.SegmentVolume.Sub(Temp.SegmentVolume);
+                            SS.RemoveStructure(Temp);
+                            if (BODY.Volume > BodyVolume)
+                            {
+                                System.Windows.Forms.MessageBox.Show("Please Check your BODY carefully", "Confirmation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
+                            BODY.Comment = "Modified by ESAPI";
                         }
-                        BODY.SegmentVolume = BODY.SegmentVolume.Sub(Temp.SegmentVolume);
-                        SS.RemoveStructure(Temp);
-                        if (BODY.Volume > BodyVolume) { System.Windows.Forms.MessageBox.Show("Please Check your BODY carefully", "Confirmation", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
-                        BODY.Comment = "Modified by ESAPI";
                     }
+
                     else if (errorCouch.Contains("Support structures already exist in the structure set."))
                     {
                         Structure Encompass = SS.Structures.FirstOrDefault(s => s.Id == "Encompass");
@@ -384,13 +409,8 @@ namespace VMS.TPS
                             BodyPar.SmoothingLevel = 1;
                             //NTUH default setting
                             BodyPar.KeepLargestParts = false;
-                            //BodyPar.PreDisconnect = true;
-                            //BodyPar.PreDisconnectRadius = 0.2;
-                            //BodyPar.FillAllCavities = true;
-                            //BodyPar.PreCloseOpenings = true;
-                            //BodyPar.PreCloseOpeningsRadius = 0.2;
-                            //BodyPar.Smoothing = true;
-                            //BodyPar.SmoothingLevel = 3;
+                            BodyPar.PreCloseOpenings = true;
+                            BodyPar.PreCloseOpeningsRadius = 0.2;
                             SS.CreateAndSearchBody(BodyPar);
                             Structure Temp = SS.AddStructure("CONTROL", "Temp_ForCouch");
                             VVector[] TempVec = GetpseudoLine(FinalYcenter, SI.XSize, SI.YSize, chkOrientation);
@@ -405,14 +425,7 @@ namespace VMS.TPS
                             SS.RemoveStructure(Temp);
                             if (BODY.Volume > BodyVolume) { System.Windows.Forms.MessageBox.Show("Please Check your BODY carefully", "Confirmation", MessageBoxButtons.OK, MessageBoxIcon.Warning); }
                             BODY.Comment = "Modified by ESAPI";
-                            //foreach (Structure st in SS.Structures.Where(s => s.DicomType != "MARKER").Where(s => s.DicomType != "EXTERNAL")) 
-                            //{ 
-                            //    if (st.CanConvertToHighResolution() == true)
-                            //    {
-                            //        st.ConvertToHighResolution();
-                            //    }
-                            //}
-                            //NTUCC
+
                             foreach (Structure st in SS.Structures.Where(s => s.DicomType == "GTV"))
                             {
                                 if (st.CanConvertToHighResolution() == true)
@@ -439,92 +452,90 @@ namespace VMS.TPS
                     else { System.Windows.MessageBox.Show(errorCouch); }
                     break;
             }
-            DateTime dateTime2 = DateTime.Now;
-            System.Windows.MessageBox.Show( (dateTime2 - dateTime1).ToString());
         }
-        public double[] MaxMinDetect(List<VVector> VVectors, PatientOrientation Ori)
+    public double[] MaxMinDetect(List<VVector> VVectors, PatientOrientation Ori)
+    {
+        double[] Final = { VVectors[0].x, VVectors[0].y, VVectors[0].z };
+        for (int i = 1; i < VVectors.Count(); i++)
         {
-            double[] Final = { VVectors[0].x, VVectors[0].y, VVectors[0].z };
-            for (int i = 1; i < VVectors.Count(); i++)
+            Final[0] = Math.Min(VVectors[i].x, Final[0]); //Always get the maximum value
+            if (Ori == PatientOrientation.HeadFirstSupine | Ori == PatientOrientation.FeetFirstSupine)
             {
-                Final[0] = Math.Min(VVectors[i].x, Final[0]); //Always get the maximum value
-                if (Ori == PatientOrientation.HeadFirstSupine | Ori == PatientOrientation.FeetFirstSupine)
-                {
-                    Final[1] = Math.Min(VVectors[i].y, Final[1]);
-                }
-                else if (Ori == PatientOrientation.HeadFirstProne | Ori == PatientOrientation.FeetFirstProne)
-                {
-                    Final[1] = Math.Max(VVectors[i].y, Final[1]);
-                }
-                Final[2] = Math.Min(VVectors[i].z, Final[2]);
+                Final[1] = Math.Min(VVectors[i].y, Final[1]);
             }
-            return Final;
-        }
-
-        public List<VVector> PeakDetect(ImageProfile Profile)
-        {
-            List<VVector> Peakpoint = new List<VVector>();
-            double OverallMaximum = Profile.Where(p => !Double.IsNaN(p.Value)).Max(p => p.Value);
-            double OverallMinimum = Profile.Where(p => !Double.IsNaN(p.Value)).Min(p => p.Value);
-
-            double Maximum = Profile.Where(p => !Double.IsNaN(p.Value)).Max(p => p.Value) - OverallMinimum;
-            double HalfTrend = Maximum / 2;
-            for (int i = 1; i < Profile.Count() - 1; i++)
+            else if (Ori == PatientOrientation.HeadFirstProne | Ori == PatientOrientation.FeetFirstProne)
             {
-
-                double ii = Profile[i].Value - OverallMinimum;
-                double iadd = Profile[i + 1].Value - OverallMinimum;
-                double iminus = Profile[i - 1].Value - OverallMinimum;
-                if (!Double.IsNaN(ii) && ii > HalfTrend && (ii > iadd) && (ii > iminus))
-                {
-                    Peakpoint.Add(Profile[i].Position);
-                }
+                Final[1] = Math.Max(VVectors[i].y, Final[1]);
             }
-            return Peakpoint;
+            Final[2] = Math.Min(VVectors[i].z, Final[2]);
         }
-
-        public static double ClosestTo(List<double> collection, double target)
-        {
-            // NB Method will return int.MaxValue for a sequence containing no elements.
-            // Apply any defensive coding here as necessary.
-            double closest = new double();
-            var minDifference = double.MaxValue;
-            foreach (var element in collection)
-            {
-                var difference = Math.Abs((long)element - target);
-                if (minDifference > difference)
-                {
-                    minDifference = (double)difference;
-                    closest = element;
-                }
-            }
-            return closest;
-        }
-
-        public static VVector FindHighestSlope(ImageProfile collection)
-        {
-            VVector HighestSlope = new VVector();
-            var minDifference = double.MinValue;
-            for (int i = 1; i < collection.Count() - 1; i++)
-            {
-                var difference = Math.Abs((long)collection[i + 1].Value - collection[i].Value);
-                if (difference > minDifference)
-                {
-                    minDifference = (double)difference;
-                    HighestSlope = collection[i].Position;
-                }
-            }
-            return HighestSlope;
-        }
-
-        public static VVector[] GetpseudoLine(double yPlane, double Xsize, double Ysize, double chkorientation)
-        {
-            List<VVector> vvectors = new List<VVector>();
-            vvectors.Add(new VVector(-Xsize, yPlane , 0));//20230616 NTUH from -30*reverse change to 0 
-            vvectors.Add(new VVector(Xsize, yPlane, 0));
-            vvectors.Add(new VVector(Xsize, chkorientation * Ysize, 0));
-            vvectors.Add(new VVector(-Xsize, chkorientation * Ysize, 0));
-            return vvectors.ToArray();
-        }
+        return Final;
     }
+
+    public List<VVector> PeakDetect(ImageProfile Profile)
+    {
+        List<VVector> Peakpoint = new List<VVector>();
+        double OverallMaximum = Profile.Where(p => !Double.IsNaN(p.Value)).Max(p => p.Value);
+        double OverallMinimum = Profile.Where(p => !Double.IsNaN(p.Value)).Min(p => p.Value);
+
+        double Maximum = Profile.Where(p => !Double.IsNaN(p.Value)).Max(p => p.Value) - OverallMinimum;
+        double HalfTrend = Maximum / 2;
+        for (int i = 1; i < Profile.Count() - 1; i++)
+        {
+
+            double ii = Profile[i].Value - OverallMinimum;
+            double iadd = Profile[i + 1].Value - OverallMinimum;
+            double iminus = Profile[i - 1].Value - OverallMinimum;
+            if (!Double.IsNaN(ii) && ii > HalfTrend && (ii > iadd) && (ii > iminus))
+            {
+                Peakpoint.Add(Profile[i].Position);
+            }
+        }
+        return Peakpoint;
+    }
+
+    public static double ClosestTo(List<double> collection, double target)
+    {
+        // NB Method will return int.MaxValue for a sequence containing no elements.
+        // Apply any defensive coding here as necessary.
+        double closest = new double();
+        var minDifference = double.MaxValue;
+        foreach (var element in collection)
+        {
+            var difference = Math.Abs((long)element - target);
+            if (minDifference > difference)
+            {
+                minDifference = (double)difference;
+                closest = element;
+            }
+        }
+        return closest;
+    }
+
+    public static VVector FindHighestSlope(ImageProfile collection)
+    {
+        VVector HighestSlope = new VVector();
+        var minDifference = double.MinValue;
+        for (int i = 1; i < collection.Count() - 1; i++)
+        {
+            var difference = Math.Abs((long)collection[i + 1].Value - collection[i].Value);
+            if (difference > minDifference)
+            {
+                minDifference = (double)difference;
+                HighestSlope = collection[i].Position;
+            }
+        }
+        return HighestSlope;
+    }
+
+    public static VVector[] GetpseudoLine(double yPlane, double Xsize, double Ysize, double chkorientation)
+    {
+        List<VVector> vvectors = new List<VVector>();
+        vvectors.Add(new VVector(-Xsize, yPlane, 0));//20230616 NTUH from -30*reverse change to 0 
+        vvectors.Add(new VVector(Xsize, yPlane, 0));
+        vvectors.Add(new VVector(Xsize, chkorientation * Ysize, 0));
+        vvectors.Add(new VVector(-Xsize, chkorientation * Ysize, 0));
+        return vvectors.ToArray();
+    }
+}
 }
