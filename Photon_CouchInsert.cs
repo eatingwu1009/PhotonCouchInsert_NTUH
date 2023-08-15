@@ -8,8 +8,8 @@ using VMS.TPS.Common.Model.Types;
 using System.Windows.Forms;
 
 // TODO: Replace the following version attributes by creating AssemblyInfo.cs. You can do this in the properties of the Visual Studio project.
-[assembly: AssemblyVersion("1.0.0.7")]
-[assembly: AssemblyFileVersion("1.0.0.7")]
+[assembly: AssemblyVersion("1.0.0.8")]
+[assembly: AssemblyFileVersion("1.0.0.8")]
 [assembly: AssemblyInformationalVersion("1.0")]
 
 // TODO: Uncomment the following line if the script requires write access.
@@ -319,36 +319,6 @@ namespace VMS.TPS
                             CouchSurface.Comment = "NTUH_Exact IGRT Couch, medium";
                             CouchSurface.StructureCode = CScode;
                             CouchInterior.StructureCode = CIcode;
-
-                            //BODY part
-                            Structure CouchSurface2 = SS.Structures.FirstOrDefault(e => e.Id == "CouchSurface");
-                            foreach (VVector[] vectors in CouchSurface2.GetContoursOnImagePlane(1))
-                            {
-                                foreach (VVector v in vectors)
-                                {
-                                    double x = v.x;
-                                    double y = v.y;
-                                    double z = v.z;
-                                    CSVVector.Add(new VVector(x, y, z));
-                                }
-                            }
-                            if (chkOrientation == 1)
-                            { FinalYcenter = CSVVector.Min(p => p.y); }
-                            else { FinalYcenter = CSVVector.Max(p => p.y); }
-                            BODY = SS.Structures.FirstOrDefault(s => s.DicomType == "EXTERNAL");
-                            Structure Temp = SS.AddStructure("CONTROL", "Temp_ForCouch");
-                            VVector[] TempVec = GetpseudoLine(FinalYcenter, SI.XSize, SI.YSize, chkOrientation);
-                            for (int i = 0; i < Convert.ToInt32(SI.ZSize); i++)
-                            {
-                                Temp.AddContourOnImagePlane(TempVec, i);
-                            }
-                            BODY.SegmentVolume = BODY.SegmentVolume.Sub(Temp.SegmentVolume);
-                            SS.RemoveStructure(Temp);
-                            if (BODY.Volume > BodyVolume)
-                            {
-                                System.Windows.Forms.MessageBox.Show("Please Check your BODY carefully", "Confirmation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            }
-                            BODY.Comment = "Modified by ESAPI";
                         }
                     }
 
